@@ -1,0 +1,37 @@
+Django==5.0.6
+djangorestframework==3.15.1
+djangorestframework-simplejwt==5.3.1
+drf-yasg==1.21.7
+psycopg2-binary==2.9.9
+django-cors-headers==4.3.1
+channels==4.1.0
+channels-redis==4.2.0
+celery==5.3.6
+redis==5.0.4
+python-decouple==3.8
+
+# Add ONE of these once the AI chatbot's LLM integration is actually built:
+# openai==1.30.0
+# google-generativeai==0.5.4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# namras section
