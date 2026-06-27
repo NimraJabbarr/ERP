@@ -6,10 +6,12 @@ ADMINISTRATION -- ADMIN-ROLE VIEWS
 from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 
 from accounts.models import StudentProfile
 from accounts.permissions import IsAdmin
 from administration.models import Complaint, Inventory, SchoolEvent, EventParticipation, Certificate
+
 from administration.serializers.admin import (
     ComplaintSerializer, InventorySerializer, SchoolEventSerializer,
     EventParticipationSerializer, CertificateSerializer, CertificateGenerateSerializer,
@@ -113,7 +115,11 @@ class CertificateGenerateView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        student = StudentProfile.objects.select_related("user").get(id=data["student_id"])
+        student = get_object_or_404(
+            StudentProfile.objects.select_related("user"),
+            id=data["student_id"],
+        )
+
         text = self.TEMPLATES[data["cert_type"]].format(
             name=student.user.full_name, roll=student.roll_number or "N/A"
         )
@@ -137,5 +143,8 @@ class CertificateDownloadView(APIView):
     permission_classes = [IsAdmin]
 
     def get(self, request, id):
-        certificate = Certificate.objects.select_related("student__user").get(id=id)
+        certificate = get_object_or_404(
+            Certificate.objects.select_related("student__user"),
+            id=id,
+        )
         return Response(CertificateSerializer(certificate).data)

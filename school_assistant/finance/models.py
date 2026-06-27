@@ -69,6 +69,13 @@ class Payment(models.Model):
     fee = models.ForeignKey(Fee, on_delete=models.CASCADE, related_name="payments")
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=20, choices=METHOD_CHOICES)
+
+    # Stripe idempotency / traceability. This field was added in migration
+    # 0002 but was missing from the model class, which crashes the webhook.
+    stripe_payment_intent_id = models.CharField(
+        max_length=255, blank=True, null=True, unique=True
+    )
+
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
     payment_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -76,6 +83,7 @@ class Payment(models.Model):
     # NOTE: application logic (or a post_save signal) should re-sum all
     # Payments for this Fee into Fee.amount_paid, and update Fee.status
     # accordingly (Unpaid -> Partial -> Paid).
+
 
 
 class Expense(models.Model):

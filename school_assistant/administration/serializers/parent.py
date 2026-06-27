@@ -11,11 +11,21 @@ class ParentComplaintSerializer(serializers.ModelSerializer):
 class ParentEventParticipationSerializer(serializers.ModelSerializer):
     event_name = serializers.CharField(source="event.event_name", read_only=True)
     event_date = serializers.DateTimeField(source="event.event_date", read_only=True)
+    student_name = serializers.CharField(source="student.user.full_name", read_only=True)
 
     class Meta:
         model = EventParticipation
-        fields = ["id", "event_name", "event_date", "role", "position", "certificate"]
-        read_only_fields = ["event_name", "event_date", "certificate"]
+        fields = [
+            "id",
+            "event_name",
+            "event_date",
+            "student_name",
+            "role",
+            "position",
+            "certificate",
+        ]
+        read_only_fields = ["event_name", "event_date", "certificate", "student_name"]
+
 
 
 class ParentCertificateSerializer(serializers.ModelSerializer):

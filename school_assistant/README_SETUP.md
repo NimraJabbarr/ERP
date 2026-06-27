@@ -156,4 +156,4 @@ school_erp_backend/
 3. Build `core/permissions.py` with `IsAdmin`, `IsTeacher`, `IsStudent`,
    `IsParent` classes — shared, write once, both developers import from it.
 4. Build Celery tasks (`tasks.py` per app) for monthly fee generation and
-   WhatsApp dispatch.
+   WhatsApp dispatch
