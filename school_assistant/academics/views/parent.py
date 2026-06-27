@@ -16,11 +16,17 @@ class ParentGradeViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminOrParent]
 
     def get_queryset(self):
-        # Parent should only see grades for students linked to this parent.
+        # Admin can view all; parent can view only their linked students.
+        from accounts.permissions import is_admin_user
+
+        if is_admin_user(self.request):
+            return Grade.objects.select_related("subject", "student")
+
         return (
             Grade.objects.select_related("subject", "student")
             .filter(student__parent_links__parent__user=self.request.user)
         )
+
 
 
 class ParentSubmissionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -30,11 +36,15 @@ class ParentSubmissionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminOrParent]
 
     def get_queryset(self):
-        # Parent should only see submissions for students linked to this parent.
+        # Admin can view all; parent can view only their linked students.
+        from accounts.permissions import is_admin_user
+
+        if is_admin_user(self.request):
+            return AssignmentSubmission.objects.select_related("assignment", "student")
+
         return (
-            AssignmentSubmission.objects.select_related(
-                "assignment", "student"
-            )
+            AssignmentSubmission.objects.select_related("assignment", "student")
             .filter(student__parent_links__parent__user=self.request.user)
         )
+
 

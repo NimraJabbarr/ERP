@@ -15,17 +15,20 @@ class TeacherComplaintViewSet(viewsets.ReadOnlyModelViewSet):
         return Complaint.objects.filter(reporter=self.request.user) | Complaint.objects.filter(against_user=self.request.user)
 
 
-class TeacherEventViewSet(viewsets.ModelViewSet):
-    """Teachers can view and manage events they are involved in."""
+class TeacherEventViewSet(viewsets.ReadOnlyModelViewSet):
+    """Teachers can view events they are involved in.
+
+    SchoolEvent is created/edited/deleted only by Admin (via created_by_admin).
+    """
     serializer_class = TeacherEventSerializer
     permission_classes = [IsAuthenticated, IsTeacher]
+
 
     def get_queryset(self):
         # SchoolEvent has no `teacher` FK; it uses `created_by_admin`.
         return SchoolEvent.objects.filter(created_by_admin=self.request.user).order_by("-event_date")
 
-    def perform_create(self, serializer):
-        serializer.save(created_by_admin=self.request.user)
+
 
 
 class TeacherEventParticipationViewSet(viewsets.ReadOnlyModelViewSet):

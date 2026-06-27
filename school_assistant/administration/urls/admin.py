@@ -28,4 +28,5 @@ urlpatterns = [
     path("admin/certificates", CertificateViewSet.as_view({"get": "list"})),
     path("admin/certificates/<int:pk>", CertificateViewSet.as_view({"get": "retrieve"})),
     path("admin/certificates/<int:id>/download", CertificateDownloadView.as_view()),
+    
 ]

@@ -17,14 +17,24 @@ class TeacherAttendanceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
 
     def get_queryset(self):
-        # restrict to attendance marked by this teacher
+        # Teachers can only see/update the attendance records they have marked.
         return Attendance.objects.filter(marked_by=self.request.user.teacher_profile)
 
+
+
+
+
+
+
+
+
     def _assert_not_locked(self, obj: Attendance):
+
         if getattr(obj, "is_locked", False):
             raise ValidationError(
                 "Attendance record is locked for this day and cannot be modified."
             )
+
 
     def perform_create(self, serializer):
         teacher_profile = self.request.user.teacher_profile

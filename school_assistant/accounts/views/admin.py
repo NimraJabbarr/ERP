@@ -73,8 +73,11 @@ class PasswordResetRequestView(APIView):
         if user:
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = password_reset_token.make_token(user)
-            logger_message = f"Password reset requested for {user.email} -- uid={uid}, token={token}"
-            print(logger_message)  # Console / Terminal mein token dikhega
+            # SECURITY: Do NOT log/print password-reset tokens.
+            # Tokens can leak via server logs/console and allow account takeover.
+            logger_message = f"Password reset requested for {user.email} -- uid={uid}"
+            print(logger_message)  # Non-sensitive metadata only
+
 
         return Response({"detail": "If that email is registered, a reset link has been sent."})
 
@@ -149,7 +152,19 @@ class ApprovalActionView(APIView):
             user.status = "Rejected"
             user.save()
 
+            # Cleanup: if a Parent account is rejected, remove the
+            # ParentProfile + ParentStudentLink rows created at signup.
+            if user.role.role_name == "Parent":
+                try:
+                    parent_profile = user.parent_profile
+                    parent_profile.delete()
+                except Exception:
+                    # If profile doesn't exist, ignore cleanup failure to
+                    # keep approval endpoint robust.
+                    pass
+
         return Response({"detail": f"User {action}d successfully.", "status": user.status})
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -169,3 +184,4 @@ class TeacherProfileViewSet(viewsets.ModelViewSet):
     queryset = TeacherProfile.objects.select_related("user").all()
     serializer_class = TeacherProfileAdminSerializer
     permission_classes = [IsAdmin]
+
