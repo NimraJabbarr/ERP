@@ -21,11 +21,29 @@ class ComplaintSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["reporter", "created_at"]
 
+    # VALIDATION: Complaint type capitalize ho
+    def validate_complaint_type(self, value):
+        if not value or len(value.strip()) < 2:
+            raise serializers.ValidationError("Complaint type must be at least 2 characters long.")
+        return value.strip().title()
+
+    # VALIDATION: Description minimum 10 characters
+    def validate_description(self, value):
+        if not value or len(value.strip()) < 10:
+            raise serializers.ValidationError("Description must be at least 10 characters long.")
+        return value.strip()
+
 
 class InventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Inventory
         fields = ["id", "item_name", "total_quantity", "assigned_to_room", "last_updated"]
+
+    # VALIDATION: Quantity negative na ho
+    def validate_total_quantity(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Quantity cannot be negative.")
+        return value
 
 
 class SchoolEventSerializer(serializers.ModelSerializer):
@@ -34,6 +52,12 @@ class SchoolEventSerializer(serializers.ModelSerializer):
         fields = ["id", "event_name", "event_date", "venue", "created_by_admin", "created_at"]
         read_only_fields = ["created_by_admin", "created_at"]
 
+    #  VALIDATION: Event name capitalize ho
+    def validate_event_name(self, value):
+        if not value or len(value.strip()) < 3:
+            raise serializers.ValidationError("Event name must be at least 3 characters long.")
+        return value.strip().title()
+
 
 class EventParticipationSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source="student.user.full_name", read_only=True)
@@ -41,6 +65,15 @@ class EventParticipationSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventParticipation
         fields = ["id", "event", "student", "student_name", "role", "position", "certificate", "created_at"]
+
+    #  VALIDATION: Position sirf predefined values allow karein
+    def validate_position(self, value):
+        ALLOWED_POSITIONS = ['1st Place', '2nd Place', '3rd Place', 'Winner', 'Participant', 'Organizer']
+        if value and value not in ALLOWED_POSITIONS:
+            raise serializers.ValidationError(
+                f"Invalid position. Allowed: {', '.join(ALLOWED_POSITIONS)}"
+            )
+        return value
 
 
 class CertificateSerializer(serializers.ModelSerializer):

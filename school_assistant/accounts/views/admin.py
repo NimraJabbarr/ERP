@@ -7,7 +7,11 @@ role) plus Admin-exclusive views (approvals, user management, roles).
 Login itself uses djangorestframework-simplejwt's built-in
 TokenObtainPairView directly in urls/admin.py -- no custom view needed.
 """
-
+import random
+import requests  # <-- NEW: EmailJS ke liye
+from django.utils import timezone
+from datetime import timedelta
+from django.conf import settings  
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -16,8 +20,9 @@ from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth.password_validation import validate_password  # <-- IMPORTANT: yeh import missing tha, add karein
 
-from accounts.models import User, Role, StudentProfile, TeacherProfile
+from accounts.models import User, Role, StudentProfile, TeacherProfile, PasswordResetToken
 from accounts.permissions import IsAdmin
 from accounts.serializers.admin import (
     RegisterSerializer, ProfileSerializer, ChangePasswordSerializer,
@@ -184,4 +189,3 @@ class TeacherProfileViewSet(viewsets.ModelViewSet):
     queryset = TeacherProfile.objects.select_related("user").all()
     serializer_class = TeacherProfileAdminSerializer
     permission_classes = [IsAdmin]
-

@@ -13,6 +13,12 @@ class FeeStructureSerializer(serializers.ModelSerializer):
         model = FeeStructure
         fields = ["id", "class_section", "monthly_fee", "created_at", "updated_at"]
 
+    #  VALIDATION: Monthly fee must be greater than 0
+    def validate_monthly_fee(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Monthly fee must be greater than 0.")
+        return value
+
 
 class FeeSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source="student.user.full_name", read_only=True)
@@ -33,6 +39,12 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ["id", "fee", "amount_paid", "payment_method", "transaction_id", "payment_date", "created_at"]
         read_only_fields = ["created_at"]
 
+    # VALIDATION: Amount paid must be greater than 0
+    def validate_amount_paid(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount paid must be greater than 0.")
+        return value
+
 
 class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,6 +54,12 @@ class ExpenseSerializer(serializers.ModelSerializer):
             "paid_by_admin", "payment_method", "created_at",
         ]
         read_only_fields = ["paid_by_admin", "created_at"]
+
+    # VALIDATION: Amount must be greater than 0
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than 0.")
+        return value
 
 
 class FeeHistorySerializer(serializers.ModelSerializer):

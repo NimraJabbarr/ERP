@@ -64,23 +64,45 @@ class RolePermission(models.Model):
 
 
 class UserManager(BaseUserManager):
-    """
-    Custom manager required because this project logs in with email
-    instead of Django's default username field.
-    """
-
     def create_user(self, email, full_name, role, password=None, **extra_fields):
         if not email:
             raise ValueError("Users must have an email address")
         email = self.normalize_email(email)
+
+        # ---- SINGLE ADMIN RULE (START) ----
+        if hasattr(role, 'role_name') and role.role_name == "Admin":
+            if User.objects.filter(role=role, is_active=True).exists():
+                raise ValueError("An Admin account already exists in the system.")
+        # ---- SINGLE ADMIN RULE (END) ----
+
         user = self.model(email=email, full_name=full_name, role=role, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+
+        # ✅ FIX: Profile creation removed from here.
+        # Profiles (Student/Teacher/Parent) are now created ONLY by the
+        # RegisterSerializer, which has all the required fields (cnic, class_section, etc.)
+        # This prevents the "duplicate key (cnic)=()" IntegrityError.
+
         return user
 
-    def create_superuser(self, email, full_name, role, password=None, **extra_fields):
-        # NOTE: the `role` Role row must already exist in the database
-        # before this is called -- see the seeding step in README_SETUP.md.
+    def create_superuser(self, email, full_name, role=None, password=None, **extra_fields):
+        if role is None:
+            role, _ = Role.objects.get_or_create(role_name="Admin", defaults={"description": "System Administrator"})
+        else:
+            if hasattr(role, 'role_name') and role.role_name != "Admin":
+                raise ValueError("Superuser must have Admin role.")
+        
+        existing_admin = User.objects.filter(role=role, is_superuser=True).first()
+        if existing_admin:
+            existing_admin.email = email
+            existing_admin.full_name = full_name
+            existing_admin.set_password(password)
+            existing_admin.status = "Active"
+            existing_admin.is_staff = True
+            existing_admin.save()
+            return existing_admin
+
         extra_fields.setdefault("status", "Active")
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
@@ -162,7 +184,12 @@ class TeacherProfile(models.Model):
     """Extra fields specific to Teacher accounts."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_profile")
-    cnic = models.CharField(max_length=20, unique=True)
+    
+    # ✅ FIX: Added null=True, blank=True to prevent "" (empty string) unique constraint violations.
+    # If a teacher is created without a CNIC (e.g., via a bug or shell), it will store NULL
+    # instead of "", which does NOT violate the unique constraint (PostgreSQL treats NULL as distinct).
+    cnic = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    
     qualification = models.CharField(max_length=150, blank=True)
     specialization = models.CharField(max_length=150, blank=True)
     joining_date = models.DateField(null=True, blank=True)
@@ -222,3 +249,17 @@ class ParentStudentLink(models.Model):
 
     def __str__(self):
         return f"{self.parent} -> {self.student} ({self.relation})"
+
+
+class PasswordResetToken(models.Model):
+    """
+    Stores OTP/Token for secure password reset flows.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reset_tokens")
+    token = models.CharField(max_length=255, unique=True, db_index=True)  # random 6-digit OTP ya JWT
+    expires_at = models.DateTimeField()  # typically 15-30 mins from creation
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.token[:10]}..."

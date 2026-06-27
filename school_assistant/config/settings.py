@@ -159,3 +159,60 @@ USE_TZ = True
 # ── STATIC FILES & DEFAULTS ───────────────────────────────────────────────────
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# namrah_section
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# aliza_section
+# ── STRIPE (TEST MODE) ──────────────────────────────────────────────────
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="sk_test_...")
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="pk_test_...")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="whsec_...")
+# ── FRONTEND URL ────────────────────────────────────────────────────────
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
+# ── EMAILJS CONFIGURATION (Free Tier) ──────────────────
+EMAILJS_SERVICE_ID = config("EMAILJS_SERVICE_ID")
+EMAILJS_TEMPLATE_ID = config("EMAILJS_TEMPLATE_ID")
+EMAILJS_PUBLIC_KEY = config("EMAILJS_PUBLIC_KEY")
+EMAILJS_PRIVATE_KEY = config("EMAILJS_PRIVATE_KEY", default="")

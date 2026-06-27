@@ -17,6 +17,7 @@ from accounts.views.admin import (
     PasswordResetRequestView, PasswordResetConfirmView,
     RoleListView, PendingApprovalListView, ApprovalActionView,
     UserViewSet, StudentProfileViewSet, TeacherProfileViewSet,
+    PasswordResetRequestView,PasswordResetConfirmView,
 )
 
 urlpatterns = [
@@ -63,4 +64,7 @@ urlpatterns = [
         TeacherProfileViewSet.as_view({"get": "retrieve", "put": "update", "patch": "partial_update"}),
         name="admin-teacher-profiles-detail",
     ),
+        # ... (existing auth routes) ...
+    path("auth/password-reset", PasswordResetRequestView.as_view(), name="auth-password-reset"),
+    path("auth/password-reset/confirm", PasswordResetConfirmView.as_view(), name="auth-password-reset-confirm"),
 ]

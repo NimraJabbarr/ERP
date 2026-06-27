@@ -28,3 +28,12 @@ class BehaviorLogSerializer(serializers.ModelSerializer):
             "id", "student", "student_name", "reported_by", "reported_by_name",
             "date", "description", "severity", "action_taken", "created_at",
         ]
+
+    #  VALIDATION: Sirf Low/Medium/High allow hain
+    def validate_severity(self, value):
+        ALLOWED = ['Low', 'Medium', 'High']
+        if value not in ALLOWED:
+            raise serializers.ValidationError(
+                f"Invalid severity. Allowed: {', '.join(ALLOWED)}"
+            )
+        return value
