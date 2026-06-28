@@ -1,0 +1,17 @@
+{
+  "services": {
+    "web": {
+      "root": ".",
+      "entrypoint": "config/wsgi.py"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "web"
+      }
+    }
+  ]
+}

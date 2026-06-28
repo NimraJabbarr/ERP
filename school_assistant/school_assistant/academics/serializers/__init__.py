@@ -1,5 +1,0 @@
-# academics/serializers/__init__.py
-from .admin import ClassSectionSerializer, SubjectSerializer, RoomSerializer, TimetableSerializer
-from .student import GradeSerializer, AssignmentSerializer, AssignmentSubmissionSerializer
-from .teacher import TeacherGradeEntrySerializer, TeacherAssignmentSerializer, TeacherAssignmentSubmissionSerializer
-from .parent import ParentGradeSerializer, ParentAssignmentSubmissionSerializer

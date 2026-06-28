@@ -1,3 +1,4 @@
+setuptools<82
 Django==5.0.6
 djangorestframework==3.15.1
 djangorestframework-simplejwt==5.3.1
@@ -10,6 +11,7 @@ celery==5.3.6
 redis==5.0.4
 python-decouple==3.8
 stripe==15.2.1
+whitenoise==6.7.0
 
 # Add ONE of these once the AI chatbot's LLM integration is actually built:
 # openai==1.30.0
